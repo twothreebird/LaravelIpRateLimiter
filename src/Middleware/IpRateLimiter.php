@@ -3,6 +3,7 @@
 namespace BrenPop\LaravelIpRateLimiter\Middleware;
 
 use BrenPop\LaravelIpRateLimiter\Models\RateLimitedIpAddress;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -17,7 +18,6 @@ class IpRateLimiter
      */
     public function handle($request, \Closure $next)
     {
-        $route = $request->route();
         $ip = $request->ip();
 
         if (! filter_var($ip, FILTER_VALIDATE_IP)) {
@@ -30,15 +30,16 @@ class IpRateLimiter
             return $next($request);
         }
 
+        $route = $request->route();
         $whitelistRoutes = config("laravelIpRateLimiter.whitelist_routes");
 
         if (in_array($route, $whitelistRoutes)) {
             return $next($request);
         }
 
-        $key = "ip:{$ip}";
+        $key = "ip:{$ip}:{$route}";
 
-        if (!Cache::has($key)) {
+        if (! Cache::has($key)) {
             Cache::put($key, 0, config("laravelIpRateLimiter.lifetime"));
         }
 
@@ -50,7 +51,7 @@ class IpRateLimiter
         }
     
         if ($attempts >= config("laravelIpRateLimiter.max_attempts")) {
-            $this->updateAttemtsCount($request, $key, $attempts);
+            $this->updateAttemtsCount($key, $attempts);
             abort(403, 'Ip rate limit reached. Try again in 24 hours.');
         }
 
@@ -63,17 +64,17 @@ class IpRateLimiter
      * @param mixed $request
      * @return \BrenPop\LaravelIpRateLimiter\Models\RateLimitedIpAddress
      */
-    protected function storeIpData($request, $redisId): RateLimitedIpAddress
+    protected function storeIpData(Request $request, $redisId): RateLimitedIpAddress
     {
         return RateLimitedIpAddress::create([
             'redis_id' => $redisId,
             'ip' => $request->ip(),
             'url' => $request->url(),
+            'route' => $request->route(),
             'method' => $request->method(),
             'headers' => json_encode($request->headers->all()),
             'query' => json_encode($request->query()),
             'body' => json_encode($request->all()),
-            'attempts' => 1,
         ]);
     }
 
@@ -84,10 +85,9 @@ class IpRateLimiter
      * @param int $attempts
      * @return void
      */
-    protected function updateAttemtsCount($request, $redisId, int $attempts)
+    protected function updateAttemtsCount($redisId, int $attempts)
     {
-        RateLimitedIpAddress::where('ip', $request->ip())
-            ->where('redis_id', $redisId)
+        RateLimitedIpAddress::where('redis_id', $redisId)
             ->update(['attempts' => $attempts]);
     }
 }

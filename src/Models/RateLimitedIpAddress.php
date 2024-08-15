@@ -10,9 +10,11 @@ class RateLimitedIpAddress extends Model
         'redis_id',
         'ip',
         'url',
+        'route',
         'method',
         'headers',
         'query',
-        'body'
+        'body',
+        'attempts'
     ];
 }

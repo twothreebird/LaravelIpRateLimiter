@@ -13,10 +13,12 @@ return new class extends Migration
             $table->string('redis_id');
             $table->string('ip');
             $table->string('url');
+            $table->string('route');
             $table->string('method');
             $table->json('headers');
             $table->json('query');
             $table->json('body');
+            $table->integer('attempts')->default(1);
             $table->timestamps();
         });
     }
