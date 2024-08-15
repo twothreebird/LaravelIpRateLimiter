@@ -4,6 +4,11 @@
 return [
     'max_attempts' => 20,
     'ttl_minutes' => 1440, // 24 hours
-    'whitelist_routes' => [],
-    'whitelist_ips' => []
+    'whitelist_paths' => [
+        // '/',
+        // 'quote'
+    ],
+    'whitelist_ips' => [
+        // '000.00.0.00',
+    ]
 ];

@@ -26,18 +26,18 @@ class IpRateLimiter
 
         $whitelistIps = config("laravelIpRateLimiter.whitelist_ips");
 
-        if (in_array($ip, $whitelistIps)) {
+        if (in_array((string) $ip, $whitelistIps)) {
             return $next($request);
         }
 
-        $route = $request->route();
-        $whitelistRoutes = config("laravelIpRateLimiter.whitelist_routes");
+        $path = $request->path();
+        $whitelistPaths = config("laravelIpRateLimiter.whitelist_paths");
 
-        if (in_array($route, $whitelistRoutes)) {
+        if (in_array($path, $whitelistPaths)) {
             return $next($request);
         }
 
-        $key = "ip:{$ip}:{$route}";
+        $key = "ip:{$ip}:{$path}";
 
         if (! Cache::has($key)) {
             Cache::put($key, 0, config("laravelIpRateLimiter.ttl_minutes"));
@@ -46,8 +46,9 @@ class IpRateLimiter
         $attempts = Cache::increment($key);
 
         if ($attempts == config("laravelIpRateLimiter.max_attempts")) {
+            $url = $request->url();
             $this->storeIpData($request, $key);
-            Log::warning("Rate limit exceeded for IP: {$ip} - Route: {$route}");
+            Log::warning("Rate limit exceeded for IP: {$ip} - Url: {$url}");
         }
     
         if ($attempts >= config("laravelIpRateLimiter.max_attempts")) {
@@ -70,7 +71,7 @@ class IpRateLimiter
             'redis_id' => $redisId,
             'ip' => $request->ip(),
             'url' => $request->url(),
-            'route' => $request->route(),
+            'path' => $request->path(),
             'method' => $request->method(),
             'headers' => json_encode($request->headers->all()),
             'query' => json_encode($request->query()),

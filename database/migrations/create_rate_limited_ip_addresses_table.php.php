@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('redis_id');
             $table->string('ip');
             $table->string('url');
-            $table->string('route');
+            $table->string('path');
             $table->string('method');
             $table->json('headers');
             $table->json('query');
