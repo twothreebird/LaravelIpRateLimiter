@@ -40,14 +40,14 @@ class IpRateLimiter
         $key = "ip:{$ip}:{$route}";
 
         if (! Cache::has($key)) {
-            Cache::put($key, 0, config("laravelIpRateLimiter.lifetime"));
+            Cache::put($key, 0, config("laravelIpRateLimiter.ttl_minutes"));
         }
 
         $attempts = Cache::increment($key);
 
         if ($attempts == config("laravelIpRateLimiter.max_attempts")) {
             $this->storeIpData($request, $key);
-            Log::warning("Rate limit exceeded for IP: {$ip}");
+            Log::warning("Rate limit exceeded for IP: {$ip} - Route: {$route}");
         }
     
         if ($attempts >= config("laravelIpRateLimiter.max_attempts")) {
