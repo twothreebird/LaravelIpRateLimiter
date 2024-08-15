@@ -17,7 +17,7 @@ class LaravelIpRateLimiterServiceProvider extends PackageServiceProvider
          */
         $package
             ->name('laravelIpRateLimiter')
-            ->hasConfigFile('laravelIpRateLimiter')
+            ->hasConfigFile()
             ->hasMigration('create_rate_limited_ip_addresses_table.php');
     }
 }

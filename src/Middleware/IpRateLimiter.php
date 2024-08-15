@@ -3,10 +3,8 @@
 namespace BrenPop\LaravelIpRateLimiter\Middleware;
 
 use BrenPop\LaravelIpRateLimiter\Models\RateLimitedIpAddress;
-use BrenPop\LaravelIpRateLimiter\Services\LaravelIpRateLimiterService;
-use DateTime;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 
 class IpRateLimiter
 {
@@ -19,13 +17,32 @@ class IpRateLimiter
      */
     public function handle($request, \Closure $next)
     {
+        $route = $request->route();
         $ip = $request->ip();
-        $key = "ip:{$ip}";
-        $attempts = Redis::incr($key);
 
-        if ($attempts == 1) {
-            Redis::expire($key, config("laravelIpRateLimiter.lifetime"));
+        if (! filter_var($ip, FILTER_VALIDATE_IP)) {
+            abort(500, "Invalid IP address");
         }
+
+        $whitelistIps = config("laravelIpRateLimiter.whitelist_ips");
+
+        if (in_array($ip, $whitelistIps)) {
+            return $next($request);
+        }
+
+        $whitelistRoutes = config("laravelIpRateLimiter.whitelist_routes");
+
+        if (in_array($route, $whitelistRoutes)) {
+            return $next($request);
+        }
+
+        $key = "ip:{$ip}";
+
+        if (!Cache::has($key)) {
+            Cache::put($key, 0, config("laravelIpRateLimiter.lifetime"));
+        }
+
+        $attempts = Cache::increment($key);
 
         if ($attempts == config("laravelIpRateLimiter.max_attempts")) {
             $this->storeIpData($request, $key);
