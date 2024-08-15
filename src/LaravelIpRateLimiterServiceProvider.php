@@ -4,7 +4,6 @@ namespace BrenPop\LaravelIpRateLimiter;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use BrenPop\LaravelIpRateLimiter\Commands\LaravelIpRateLimiterCommand;
 
 class LaravelIpRateLimiterServiceProvider extends PackageServiceProvider
 {
