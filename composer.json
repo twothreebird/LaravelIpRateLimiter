@@ -2,12 +2,13 @@
     "name": "twothreebird/laravelipratelimiter",
     "description": "A middleware package to track and store IP addresses in cache and MySQL.",
     "keywords": [
-        "BrenPop",
+        "twothreebird",
         "laravel",
         "laravelipratelimiter"
     ],
     "homepage": "https://github.com/twothreebird/laravelipratelimiter",
     "license": "MIT",
+    "type": "library",
     "authors": [
         {
             "name": "Brendan van der Meulen",

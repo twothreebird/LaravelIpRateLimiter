@@ -1,13 +1,11 @@
-# A middleware package to track and store IP addresses in Redis and MySQL.
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+# A middleware package to track and store IP addresses in cache and MySQL.
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require brenpop/laravelipratelimiter
+composer require twothreebird/laravelipratelimiter
 ```
 
 You can publish and run the migrations with:
